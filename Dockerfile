@@ -9,5 +9,4 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/notifications-lib-1.0.0.jar ./notifications-lib.jar
-# Incluimos slf4j-simple en el classpath para ver los logs en consola
-ENTRYPOINT ["java", "-cp", "notifications-lib.jar", "com.notifications.example.NotificationExample"]
+ENTRYPOINT ["java", "-jar", "notifications-lib.jar"]
