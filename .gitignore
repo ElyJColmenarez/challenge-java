@@ -36,7 +36,9 @@ Thumbs.db
 !README.md
 !Dockerfile
 !docker-compose.yml
-!TECHNICAL_DECISIONS.md
-!CHALLENGE_JUSTIFICATION.md
-!GEMINI.md
-!challenge_notification_lib_backendv2.pdf
+
+# Instrucciones (No subir al repo)
+GEMINI.md
+challenge_notification_lib_backendv2.pdf
+TECHNICAL_DECISIONS.md
+CHALLENGE_JUSTIFICATION.md

@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  notifications-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: notifications-challenge
+    # Los logs se mostrarán directamente en la consola
+    tty: true
+    stdin_open: true
