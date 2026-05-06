@@ -1,0 +1,42 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.restoreBackup
+release.properties
+bundle.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# VS Code
+.vscode/
+.history/
+*.code-workspace
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Project specific
+!pom.xml
+!src/
+!README.md
+!Dockerfile
+!docker-compose.yml
+!TECHNICAL_DECISIONS.md
+!CHALLENGE_JUSTIFICATION.md
+!GEMINI.md
+!challenge_notification_lib_backendv2.pdf
