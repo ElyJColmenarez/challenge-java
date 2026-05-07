@@ -64,30 +64,26 @@ service.sendAsync("EMAIL", email).thenAccept(res -> {
 ### Arquitectura Core
 
 La librería se basa en una arquitectura de **Estrategia Concéntrica**:
-1.**NotificationService (Facade):** Orquestador principal.
 
-2.**NotificationChannel (Strategy):** Interfaz que define un canal (Email, SMS, etc).
-3.**Providers (Strategy Interno):** Cada canal delega el envío real a un proveedor específico.
+1. **NotificationService (Facade):** Orquestador principal.
+2. **NotificationChannel (Strategy):** Interfaz que define un canal (Email, SMS, etc).
+3. **Providers (Strategy Interno):** Cada canal delega el envío real a un proveedor específico.
 
 ### Cómo Extender la Librería
 
 #### A. Agregar un Nuevo Canal (Ejemplo: WhatsApp)
 
-1.**Define el modelo:** Crea un nuevo `record WhatsAppNotification` e inclúyelo en los `permits` de la interfaz `Notification`.
-
-2.**Crea el Canal:** Crea `WhatsAppChannel` implementando `NotificationChannel`.
-
-3.**Configura el Canal:** Crea `WhatsAppConfig` para sus credenciales.
-
-4.**Actualiza la Factory:** Añade el método de creación en `NotificationChannelFactory`.
+1. **Define el modelo:** Crea un nuevo `record WhatsAppNotification` e inclúyelo en los `permits` de la interfaz `Notification`.
+2. **Crea el Canal:** Crea `WhatsAppChannel` implementando `NotificationChannel`.
+3. **Configura el Canal:** Crea `WhatsAppConfig` para sus credenciales.
+4. **Actualiza la Factory:** Añade el método de creación en `NotificationChannelFactory`.
 
 #### B. Agregar un Nuevo Proveedor a un Canal Existente
 
 Si deseas agregar un proveedor de SMS diferente a Twilio (ejemplo: Amazon SNS):
 
-1.Implementa la interfaz `SmsProvider` en una nueva clase `AmazonSnsSmsProvider`.
-
-2.Actualiza la lógica de `SmsChannel.createProvider()` para que reconozca el nuevo tipo de proveedor desde la configuración.
+1. Implementa la interfaz `SmsProvider` en una nueva clase `AmazonSnsSmsProvider`.
+2. Actualiza la lógica de `SmsChannel.createProvider()` para que reconozca el nuevo tipo de proveedor desde la configuración.
 
 ### Manejo de Errores
 
