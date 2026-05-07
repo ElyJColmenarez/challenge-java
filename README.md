@@ -5,10 +5,13 @@ Librería de notificaciones unificada, agnóstica a frameworks y altamente exten
 ---
 
 ## 👤 Guía de Usuario
+
 *Para desarrolladores que desean integrar el envío de notificaciones en sus aplicaciones.*
 
 ### 1. Instalación
+
 Agrega la dependencia a tu `pom.xml`:
+
 ```xml
 <dependency>
     <groupId>com.notifications</groupId>
@@ -18,6 +21,7 @@ Agrega la dependencia a tu `pom.xml`:
 ```
 
 ### 2. Configuración Inicial
+
 La librería utiliza un **NotificationService** central para orquestar los envíos. Debes registrar los canales que deseas utilizar:
 
 ```java
@@ -35,6 +39,7 @@ service.registerChannel(NotificationChannelFactory.createSmsChannel(
 ```
 
 ### 3. Envío de Notificaciones
+
 Utiliza los **Records** específicos para cada tipo de mensaje. El envío puede ser síncrono o asíncrono.
 
 ```java
@@ -53,28 +58,39 @@ service.sendAsync("EMAIL", email).thenAccept(res -> {
 ---
 
 ## 🛠️ Guía de Desarrollador
+
 *Para ingenieros que desean extender la librería o entender su arquitectura interna.*
 
 ### Arquitectura Core
+
 La librería se basa en una arquitectura de **Estrategia Concéntrica**:
-1.  **NotificationService (Facade):** Orquestador principal.
-2.  **NotificationChannel (Strategy):** Interfaz que define un canal (Email, SMS, etc).
-3.  **Providers (Strategy Interno):** Cada canal delega el envío real a un proveedor específico.
+1.**NotificationService (Facade):** Orquestador principal.
+
+2.**NotificationChannel (Strategy):** Interfaz que define un canal (Email, SMS, etc).
+3.**Providers (Strategy Interno):** Cada canal delega el envío real a un proveedor específico.
 
 ### Cómo Extender la Librería
 
 #### A. Agregar un Nuevo Canal (Ejemplo: WhatsApp)
-1.  **Define el modelo:** Crea un nuevo `record WhatsAppNotification` e inclúyelo en los `permits` de la interfaz `Notification`.
-2.  **Crea el Canal:** Crea `WhatsAppChannel` implementando `NotificationChannel`.
-3.  **Configura el Canal:** Crea `WhatsAppConfig` para sus credenciales.
-4.  **Actualiza la Factory:** Añade el método de creación en `NotificationChannelFactory`.
+
+1.**Define el modelo:** Crea un nuevo `record WhatsAppNotification` e inclúyelo en los `permits` de la interfaz `Notification`.
+
+2.**Crea el Canal:** Crea `WhatsAppChannel` implementando `NotificationChannel`.
+
+3.**Configura el Canal:** Crea `WhatsAppConfig` para sus credenciales.
+
+4.**Actualiza la Factory:** Añade el método de creación en `NotificationChannelFactory`.
 
 #### B. Agregar un Nuevo Proveedor a un Canal Existente
+
 Si deseas agregar un proveedor de SMS diferente a Twilio (ejemplo: Amazon SNS):
-1.  Implementa la interfaz `SmsProvider` en una nueva clase `AmazonSnsSmsProvider`.
-2.  Actualiza la lógica de `SmsChannel.createProvider()` para que reconozca el nuevo tipo de proveedor desde la configuración.
+
+1.Implementa la interfaz `SmsProvider` en una nueva clase `AmazonSnsSmsProvider`.
+
+2.Actualiza la lógica de `SmsChannel.createProvider()` para que reconozca el nuevo tipo de proveedor desde la configuración.
 
 ### Manejo de Errores
+
 No lanzamos excepciones de flujo. Usamos el patrón **Result Type** mediante el record `NotificationResult`. Esto permite que el cliente maneje fallos de validación o red de forma declarativa.
 
 ---
@@ -82,12 +98,15 @@ No lanzamos excepciones de flujo. Usamos el patrón **Result Type** mediante el 
 ## 🐳 Ejecución y Pruebas
 
 ### Docker Compose (Recomendado)
+
 Para compilar y ejecutar el demo funcional:
+
 ```bash
 docker-compose up --build
 ```
 
 ### Ejecución Local
+
 ```bash
 mvn clean package
 java -jar target/notifications-lib-1.0.0.jar
@@ -96,9 +115,11 @@ java -jar target/notifications-lib-1.0.0.jar
 ---
 
 ## 🔒 Seguridad y Mejores Prácticas
-*   **Inmutabilidad:** Todos los modelos de datos son `records` para garantizar que la notificación no sea alterada durante el proceso de envío.
-*   **Agnosticismo:** Prohibido el uso de anotaciones de frameworks (`@Component`, `@Service`). La configuración es 100% via código Java.
-*   **Validación:** Se incluye validación automática de Email (RFC) y Teléfonos (E.164) antes de cualquier intento de envío.
+
+* **Inmutabilidad:** Todos los modelos de datos son `records` para garantizar que la notificación no sea alterada durante el proceso de envío.
+
+* **Agnosticismo:** Prohibido el uso de anotaciones de frameworks (`@Component`, `@Service`). La configuración es 100% via código Java.
+
+* **Validación:** Se incluye validación automática de Email (RFC) y Teléfonos (E.164) antes de cualquier intento de envío.
 
 ---
-*Librería desarrollada siguiendo estándares Senior de diseño y seguridad.*
