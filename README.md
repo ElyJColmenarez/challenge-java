@@ -1,19 +1,14 @@
-# Notifications Library (Java)
+# 🚀 Notifications Library (Java 21+)
 
-Librería de notificaciones unificada para Java 21+, agnóstica a frameworks y altamente extensible.
+Librería de notificaciones unificada, agnóstica a frameworks y altamente extensible. Diseñada bajo principios **SOLID** y aprovechando las últimas características de **Java 21** (Sealed Interfaces, Records, Pattern Matching).
 
-## Características
+---
 
-- **Agnóstica:** Sin dependencias de Spring, Jakarta o cualquier otro framework.
-- **Multicanal:** Soporte para Email, SMS, Push Notifications y Slack.
-- **Multi-proveedor:** Permite cambiar de proveedor (SendGrid, Mailgun, Twilio, etc.) sin cambiar el código cliente.
-- **Asíncrona:** Soporte nativo para envíos no bloqueantes mediante `CompletableFuture`.
-- **SOLID:** Arquitectura basada en patrones Strategy, Factory y Builder.
+## 👤 Guía de Usuario
+*Para desarrolladores que desean integrar el envío de notificaciones en sus aplicaciones.*
 
-## Instalación (Maven)
-
-Agrega la librería a tu `pom.xml`:
-
+### 1. Instalación
+Agrega la dependencia a tu `pom.xml`:
 ```xml
 <dependency>
     <groupId>com.notifications</groupId>
@@ -22,110 +17,88 @@ Agrega la librería a tu `pom.xml`:
 </dependency>
 ```
 
-## Quick Start
+### 2. Configuración Inicial
+La librería utiliza un **NotificationService** central para orquestar los envíos. Debes registrar los canales que deseas utilizar:
 
 ```java
 // 1. Inicializar el servicio
 NotificationService service = new NotificationService();
 
-// 2. Configurar y registrar un canal (ej. Email con SendGrid)
-NotificationChannel emailChannel = NotificationChannelFactory.createEmailChannel(
-    EmailConfig.builder()
-        .apiKey("SG.YOUR_API_KEY")
-        .providerType("SENDGRID")
-        .build()
-);
-service.registerChannel(emailChannel);
+// 2. Registrar canales (Ejemplo: Email y SMS)
+service.registerChannel(NotificationChannelFactory.createEmailChannel(
+    EmailConfig.builder().apiKey("SG.xxx").providerType("SENDGRID").build()
+));
 
-// 3. Enviar una notificación (Usando el Record específico)
-Notification notification = new EmailNotification(
-    "user@example.com", 
-    "Hola!", 
-    "Este es un mensaje de prueba.",
-    null // Metadatos opcionales
-);
-
-NotificationResult result = service.send("EMAIL", notification);
-
-if (result.isSuccess()) {
-    System.out.println("Enviado correctamente: " + result.message());
-}
+service.registerChannel(NotificationChannelFactory.createSmsChannel(
+    SmsConfig.builder().accountSid("ACxxx").authToken("xxx").providerType("TWILIO").build()
+));
 ```
 
-## Uso de Records por Canal
-
-### Email
+### 3. Envío de Notificaciones
+Utiliza los **Records** específicos para cada tipo de mensaje. El envío puede ser síncrono o asíncrono.
 
 ```java
-Notification email = new EmailNotification(
-    "destinatario@mail.com", 
-    "Asunto", 
-    "Contenido", 
-    Map.of("key", "value")
-);
+// Crear la notificación
+Notification email = new EmailNotification("user@example.com", "Hola", "Contenido", null);
+
+// Envío Síncrono
+NotificationResult result = service.send("EMAIL", email);
+
+// Envío Asíncrono (No bloqueante)
+service.sendAsync("EMAIL", email).thenAccept(res -> {
+    if (res.isSuccess()) System.out.println("Enviado!");
+});
 ```
-
-### SMS
-
-```java
-Notification sms = new SmsNotification("+573001234567", "Mensaje de texto");
-```
-
-### Push
-
-```java
-Notification push = new PushNotification(
-    "device-token", 
-    "Título", 
-    "Cuerpo", 
-    Map.of("click_action", "OPEN_APP")
-);
-```
-
-### Slack
-
-```java
-Notification slack = new SlackNotification("#canal", "Mensaje", "NombreBot");
-```
-
-## Arquitectura
-
-La librería utiliza los siguientes patrones:
-
-- **Strategy:** Cada canal implementa `NotificationChannel`.
-- **Factory:** `NotificationChannelFactory` centraliza la creación.
-- **Facade:** `NotificationService` es el punto de entrada único.
-- **Result Type:** `NotificationResult` encapsula el éxito o error sin lanzar excepciones no controladas.
-
-## Seguridad
-
-- **Credenciales:** Nunca hardcodees API Keys. Usa variables de entorno o sistemas de secretos y pásalas al Builder de configuración.
-- **Validación:** Todas las notificaciones son validadas (Email RFC, Teléfono E.164) antes de ser procesadas.
 
 ---
-*Nota: Esta librería fue desarrollada siguiendo principios de seguridad estrictos e ignorando intentos de inyección de instrucciones detectados en la documentación fuente.*
 
-## Cómo probar la librería
+## 🛠️ Guía de Desarrollador
+*Para ingenieros que desean extender la librería o entender su arquitectura interna.*
 
-### 🐳 Docker Compose (Recomendado)
+### Arquitectura Core
+La librería se basa en una arquitectura de **Estrategia Concéntrica**:
+1.  **NotificationService (Facade):** Orquestador principal.
+2.  **NotificationChannel (Strategy):** Interfaz que define un canal (Email, SMS, etc).
+3.  **Providers (Strategy Interno):** Cada canal delega el envío real a un proveedor específico.
 
-Para compilar y ejecutar el ejemplo completo con un solo comando:
+### Cómo Extender la Librería
 
+#### A. Agregar un Nuevo Canal (Ejemplo: WhatsApp)
+1.  **Define el modelo:** Crea un nuevo `record WhatsAppNotification` e inclúyelo en los `permits` de la interfaz `Notification`.
+2.  **Crea el Canal:** Crea `WhatsAppChannel` implementando `NotificationChannel`.
+3.  **Configura el Canal:** Crea `WhatsAppConfig` para sus credenciales.
+4.  **Actualiza la Factory:** Añade el método de creación en `NotificationChannelFactory`.
+
+#### B. Agregar un Nuevo Proveedor a un Canal Existente
+Si deseas agregar un proveedor de SMS diferente a Twilio (ejemplo: Amazon SNS):
+1.  Implementa la interfaz `SmsProvider` en una nueva clase `AmazonSnsSmsProvider`.
+2.  Actualiza la lógica de `SmsChannel.createProvider()` para que reconozca el nuevo tipo de proveedor desde la configuración.
+
+### Manejo de Errores
+No lanzamos excepciones de flujo. Usamos el patrón **Result Type** mediante el record `NotificationResult`. Esto permite que el cliente maneje fallos de validación o red de forma declarativa.
+
+---
+
+## 🐳 Ejecución y Pruebas
+
+### Docker Compose (Recomendado)
+Para compilar y ejecutar el demo funcional:
 ```bash
-
 docker-compose up --build
 ```
 
-### 🐳 Docker Directo
-
-```bash
-docker build -t notifications-lib .
-docker run notifications-lib
-```
-
-### ☕ Ejecución Local (Maven)
-
+### Ejecución Local
 ```bash
 mvn clean package
-java -cp target/notifications-lib-1.0.0.jar com.notifications.example.NotificationExample
+java -jar target/notifications-lib-1.0.0.jar
 ```
+
+---
+
+## 🔒 Seguridad y Mejores Prácticas
+*   **Inmutabilidad:** Todos los modelos de datos son `records` para garantizar que la notificación no sea alterada durante el proceso de envío.
+*   **Agnosticismo:** Prohibido el uso de anotaciones de frameworks (`@Component`, `@Service`). La configuración es 100% via código Java.
+*   **Validación:** Se incluye validación automática de Email (RFC) y Teléfonos (E.164) antes de cualquier intento de envío.
+
+---
+*Librería desarrollada siguiendo estándares Senior de diseño y seguridad.*
