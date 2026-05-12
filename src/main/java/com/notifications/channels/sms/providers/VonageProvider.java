@@ -1,12 +1,11 @@
 package com.notifications.channels.sms.providers;
 
-import com.notifications.core.Notification;
 import com.notifications.core.NotificationResult;
 import com.notifications.core.SmsNotification;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Implementación simulada de Vonage.
+ * Proveedor de SMS usando Vonage (Simulado).
  */
 @Slf4j
 public class VonageProvider implements SmsProvider {
@@ -19,13 +18,9 @@ public class VonageProvider implements SmsProvider {
     }
 
     @Override
-    public NotificationResult send(Notification notification) {
-        if (!(notification instanceof SmsNotification sms)) {
-            return NotificationResult.failed("Expected SmsNotification", null);
-        }
-
+    public NotificationResult send(SmsNotification sms) {
         if (apiKey == null || apiSecret == null) {
-            return NotificationResult.failed("Vonage credentials missing", null);
+            return NotificationResult.failed("Vonage API credentials missing", null);
         }
 
         log.info("[SIMULATED] Sending SMS via Vonage - To: {}, Text: {}", 

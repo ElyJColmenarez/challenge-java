@@ -3,17 +3,15 @@ package com.notifications.channels.sms;
 import com.notifications.channels.sms.providers.SmsProvider;
 import com.notifications.channels.sms.providers.TwilioProvider;
 import com.notifications.channels.sms.providers.VonageProvider;
-import com.notifications.core.Notification;
-import com.notifications.core.NotificationChannel;
+import com.notifications.core.AbstractNotificationChannel;
 import com.notifications.core.NotificationResult;
 import com.notifications.core.SmsNotification;
 import com.notifications.validation.NotificationValidator;
-import com.notifications.validation.ValidationResult;
 
 /**
  * Canal de notificación para SMS.
  */
-public class SmsChannel implements NotificationChannel {
+public class SmsChannel extends AbstractNotificationChannel<SmsNotification> {
     private final SmsProvider provider;
 
     public SmsChannel(SmsConfig config) {
@@ -28,20 +26,19 @@ public class SmsChannel implements NotificationChannel {
     }
 
     @Override
-    public NotificationResult send(Notification notification) {
-        if (!(notification instanceof SmsNotification sms)) {
-            return NotificationResult.invalid("Expected SmsNotification but received: " + notification.getClass().getSimpleName());
-        }
+    protected Class<SmsNotification> getNotificationClass() {
+        return SmsNotification.class;
+    }
 
-        ValidationResult commonValidation = NotificationValidator.validateCommon(notification);
-        if (!commonValidation.valid()) {
-            return NotificationResult.invalid(String.join(", ", commonValidation.errors()));
-        }
-
+    @Override
+    protected void validateSpecific(SmsNotification sms) {
         if (!NotificationValidator.isValidPhone(sms.recipient())) {
-            return NotificationResult.invalid("Invalid phone format (E.164 required): " + sms.recipient());
+            throw new IllegalArgumentException("Invalid phone format (E.164 required): " + sms.recipient());
         }
+    }
 
+    @Override
+    protected NotificationResult performSend(SmsNotification notification) {
         return provider.send(notification);
     }
 

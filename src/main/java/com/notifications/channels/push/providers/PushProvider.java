@@ -1,12 +1,12 @@
 package com.notifications.channels.push.providers;
 
-import com.notifications.core.Notification;
 import com.notifications.core.NotificationResult;
+import com.notifications.core.PushNotification;
 
 /**
- * Interfaz para implementaciones específicas de proveedores Push.
+ * Interfaz para proveedores de Push Notifications.
  */
 public interface PushProvider {
-    NotificationResult send(Notification notification);
+    NotificationResult send(PushNotification notification);
     String getProviderName();
 }

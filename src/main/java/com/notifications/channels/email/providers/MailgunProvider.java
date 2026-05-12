@@ -1,12 +1,11 @@
 package com.notifications.channels.email.providers;
 
 import com.notifications.core.EmailNotification;
-import com.notifications.core.Notification;
 import com.notifications.core.NotificationResult;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Implementación simulada de Mailgun.
+ * Proveedor de Email usando Mailgun (Simulado).
  */
 @Slf4j
 public class MailgunProvider implements EmailProvider {
@@ -19,13 +18,9 @@ public class MailgunProvider implements EmailProvider {
     }
 
     @Override
-    public NotificationResult send(Notification notification) {
-        if (!(notification instanceof EmailNotification email)) {
-            return NotificationResult.failed("Expected EmailNotification", null);
-        }
-
-        if (apiKey == null || domain == null) {
-            return NotificationResult.failed("Mailgun credentials (API Key or Domain) are missing", null);
+    public NotificationResult send(EmailNotification email) {
+        if (apiKey == null || apiKey.isEmpty() || domain == null || domain.isEmpty()) {
+            return NotificationResult.failed("Mailgun credentials missing", null);
         }
 
         log.info("[SIMULATED] Sending Email via Mailgun - Domain: {}, To: {}, Subject: {}", 

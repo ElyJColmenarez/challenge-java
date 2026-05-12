@@ -2,17 +2,15 @@ package com.notifications.channels.push;
 
 import com.notifications.channels.push.providers.FirebaseFcmProvider;
 import com.notifications.channels.push.providers.PushProvider;
-import com.notifications.core.Notification;
-import com.notifications.core.NotificationChannel;
+import com.notifications.core.AbstractNotificationChannel;
 import com.notifications.core.NotificationResult;
 import com.notifications.core.PushNotification;
 import com.notifications.validation.NotificationValidator;
-import com.notifications.validation.ValidationResult;
 
 /**
  * Canal de notificación para Push Notifications.
  */
-public class PushChannel implements NotificationChannel {
+public class PushChannel extends AbstractNotificationChannel<PushNotification> {
     private final PushProvider provider;
 
     public PushChannel(PushConfig config) {
@@ -20,20 +18,19 @@ public class PushChannel implements NotificationChannel {
     }
 
     @Override
-    public NotificationResult send(Notification notification) {
-        if (!(notification instanceof PushNotification push)) {
-            return NotificationResult.invalid("Expected PushNotification but received: " + notification.getClass().getSimpleName());
-        }
+    protected Class<PushNotification> getNotificationClass() {
+        return PushNotification.class;
+    }
 
-        ValidationResult commonValidation = NotificationValidator.validateCommon(notification);
-        if (!commonValidation.valid()) {
-            return NotificationResult.invalid(String.join(", ", commonValidation.errors()));
-        }
-
+    @Override
+    protected void validateSpecific(PushNotification push) {
         if (!NotificationValidator.isValidToken(push.recipient())) {
-            return NotificationResult.invalid("Device Token cannot be empty");
+            throw new IllegalArgumentException("Device Token cannot be empty");
         }
+    }
 
+    @Override
+    protected NotificationResult performSend(PushNotification notification) {
         return provider.send(notification);
     }
 

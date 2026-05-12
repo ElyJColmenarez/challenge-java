@@ -2,17 +2,15 @@ package com.notifications.channels.slack;
 
 import com.notifications.channels.slack.providers.SlackProvider;
 import com.notifications.channels.slack.providers.SlackWebhookProvider;
-import com.notifications.core.Notification;
-import com.notifications.core.NotificationChannel;
+import com.notifications.core.AbstractNotificationChannel;
 import com.notifications.core.NotificationResult;
 import com.notifications.core.SlackNotification;
 import com.notifications.validation.NotificationValidator;
-import com.notifications.validation.ValidationResult;
 
 /**
  * Canal de notificación para Slack.
  */
-public class SlackChannel implements NotificationChannel {
+public class SlackChannel extends AbstractNotificationChannel<SlackNotification> {
     private final SlackProvider provider;
 
     public SlackChannel(SlackConfig config) {
@@ -20,20 +18,19 @@ public class SlackChannel implements NotificationChannel {
     }
 
     @Override
-    public NotificationResult send(Notification notification) {
-        if (!(notification instanceof SlackNotification slack)) {
-            return NotificationResult.invalid("Expected SlackNotification but received: " + notification.getClass().getSimpleName());
-        }
+    protected Class<SlackNotification> getNotificationClass() {
+        return SlackNotification.class;
+    }
 
-        ValidationResult commonValidation = NotificationValidator.validateCommon(notification);
-        if (!commonValidation.valid()) {
-            return NotificationResult.invalid(String.join(", ", commonValidation.errors()));
-        }
-
+    @Override
+    protected void validateSpecific(SlackNotification slack) {
         if (!NotificationValidator.isValidToken(slack.recipient())) {
-            return NotificationResult.invalid("Slack channel/recipient cannot be empty");
+            throw new IllegalArgumentException("Slack channel/recipient cannot be empty");
         }
+    }
 
+    @Override
+    protected NotificationResult performSend(SlackNotification notification) {
         return provider.send(notification);
     }
 

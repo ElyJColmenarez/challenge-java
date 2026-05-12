@@ -1,6 +1,6 @@
 package com.notifications.channels.email.providers;
 
-import com.notifications.core.Notification;
+import com.notifications.core.EmailNotification;
 import com.notifications.core.NotificationResult;
 
 /**
@@ -9,10 +9,10 @@ import com.notifications.core.NotificationResult;
 public interface EmailProvider {
     /**
      * Realiza el envío simulado a través del proveedor.
-     * @param notification Notificación a enviar.
+     * @param notification Notificación de email a enviar.
      * @return Resultado del envío.
      */
-    NotificationResult send(Notification notification);
+    NotificationResult send(EmailNotification notification);
 
     /**
      * @return Nombre del proveedor.

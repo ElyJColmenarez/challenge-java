@@ -1,12 +1,11 @@
 package com.notifications.channels.slack.providers;
 
-import com.notifications.core.Notification;
 import com.notifications.core.NotificationResult;
 import com.notifications.core.SlackNotification;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Implementación simulada de Slack Webhook.
+ * Proveedor de Slack usando Webhooks (Simulado).
  */
 @Slf4j
 public class SlackWebhookProvider implements SlackProvider {
@@ -19,28 +18,22 @@ public class SlackWebhookProvider implements SlackProvider {
     }
 
     @Override
-    public NotificationResult send(Notification notification) {
-        if (!(notification instanceof SlackNotification slack)) {
-            return NotificationResult.failed("Expected SlackNotification", null);
-        }
-
+    public NotificationResult send(SlackNotification slack) {
         if (webhookUrl == null || webhookUrl.isEmpty()) {
             return NotificationResult.failed("Slack Webhook URL is missing", null);
         }
 
-        // Si la notificación no trae username, usamos el configurado en el proveedor
-        String effectiveUser = (slack.username() != null && !slack.username().isEmpty()) 
-                                ? slack.username() 
-                                : this.username;
+        // El record SlackNotification puede traer su propio username, si no, usamos el del proveedor
+        String sender = (slack.username() != null) ? slack.username() : this.username;
 
-        log.info("[SIMULATED] Sending Slack Message - Webhook: {}, User: {}, Channel: {}, Text: {}", 
-                 webhookUrl, effectiveUser, slack.recipient(), slack.content());
+        log.info("[SIMULATED] Sending Slack Message via Webhook - Channel: {}, Sender: {}, Message: {}", 
+                 slack.recipient(), sender, slack.content());
         
         return NotificationResult.success("Slack message sent successfully");
     }
 
     @Override
     public String getProviderName() {
-        return "SlackWebhook";
+        return "Slack Webhook";
     }
 }

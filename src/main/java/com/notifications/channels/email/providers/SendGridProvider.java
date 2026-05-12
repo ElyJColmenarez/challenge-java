@@ -1,12 +1,11 @@
 package com.notifications.channels.email.providers;
 
 import com.notifications.core.EmailNotification;
-import com.notifications.core.Notification;
 import com.notifications.core.NotificationResult;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Implementación simulada de SendGrid.
+ * Proveedor de Email usando SendGrid (Simulado).
  */
 @Slf4j
 public class SendGridProvider implements EmailProvider {
@@ -17,11 +16,7 @@ public class SendGridProvider implements EmailProvider {
     }
 
     @Override
-    public NotificationResult send(Notification notification) {
-        if (!(notification instanceof EmailNotification email)) {
-            return NotificationResult.failed("Expected EmailNotification", null);
-        }
-
+    public NotificationResult send(EmailNotification email) {
         if (apiKey == null || apiKey.isEmpty()) {
             return NotificationResult.failed("SendGrid API Key is missing", null);
         }

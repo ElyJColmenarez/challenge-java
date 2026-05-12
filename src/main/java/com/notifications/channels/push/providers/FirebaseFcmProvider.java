@@ -1,12 +1,11 @@
 package com.notifications.channels.push.providers;
 
-import com.notifications.core.Notification;
 import com.notifications.core.NotificationResult;
 import com.notifications.core.PushNotification;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Implementación simulada de Firebase FCM.
+ * Proveedor de Push Notifications usando Firebase Cloud Messaging (Simulado).
  */
 @Slf4j
 public class FirebaseFcmProvider implements PushProvider {
@@ -17,23 +16,19 @@ public class FirebaseFcmProvider implements PushProvider {
     }
 
     @Override
-    public NotificationResult send(Notification notification) {
-        if (!(notification instanceof PushNotification push)) {
-            return NotificationResult.failed("Expected PushNotification", null);
-        }
-
+    public NotificationResult send(PushNotification push) {
         if (projectId == null || projectId.isEmpty()) {
             return NotificationResult.failed("Firebase Project ID is missing", null);
         }
 
-        log.info("[SIMULATED] Sending Push Notification via Firebase - Project: {}, Token: {}, Title: {}, Body: {}", 
-                 projectId, push.recipient(), push.title(), push.content());
+        log.info("[SIMULATED] Sending Push Notification via Firebase - Project: {}, Token: {}, Title: {}", 
+                 projectId, push.recipient(), push.title());
         
-        return NotificationResult.success("Push notification sent successfully via Firebase");
+        return NotificationResult.success("Push Notification sent successfully via Firebase");
     }
 
     @Override
     public String getProviderName() {
-        return "FirebaseFCM";
+        return "Firebase FCM";
     }
 }

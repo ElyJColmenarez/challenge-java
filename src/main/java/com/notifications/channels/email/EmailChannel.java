@@ -3,17 +3,15 @@ package com.notifications.channels.email;
 import com.notifications.channels.email.providers.EmailProvider;
 import com.notifications.channels.email.providers.MailgunProvider;
 import com.notifications.channels.email.providers.SendGridProvider;
+import com.notifications.core.AbstractNotificationChannel;
 import com.notifications.core.EmailNotification;
-import com.notifications.core.Notification;
-import com.notifications.core.NotificationChannel;
 import com.notifications.core.NotificationResult;
 import com.notifications.validation.NotificationValidator;
-import com.notifications.validation.ValidationResult;
 
 /**
  * Canal de notificación para Email.
  */
-public class EmailChannel implements NotificationChannel {
+public class EmailChannel extends AbstractNotificationChannel<EmailNotification> {
     private final EmailProvider provider;
 
     public EmailChannel(EmailConfig config) {
@@ -24,25 +22,24 @@ public class EmailChannel implements NotificationChannel {
         if ("MAILGUN".equalsIgnoreCase(config.getProviderType())) {
             return new MailgunProvider(config.getApiKey(), config.getDomain());
         }
-        // Por defecto SendGrid
         return new SendGridProvider(config.getApiKey());
     }
 
     @Override
-    public NotificationResult send(Notification notification) {
-        if (!(notification instanceof EmailNotification email)) {
-            return NotificationResult.invalid("Expected EmailNotification but received: " + notification.getClass().getSimpleName());
-        }
+    protected Class<EmailNotification> getNotificationClass() {
+        return EmailNotification.class;
+    }
 
-        ValidationResult commonValidation = NotificationValidator.validateCommon(notification);
-        if (!commonValidation.valid()) {
-            return NotificationResult.invalid(String.join(", ", commonValidation.errors()));
-        }
-
+    @Override
+    protected void validateSpecific(EmailNotification email) {
         if (!NotificationValidator.isValidEmail(email.recipient())) {
-            return NotificationResult.invalid("Invalid email format: " + email.recipient());
+            throw new IllegalArgumentException("Invalid email format: " + email.recipient());
         }
+    }
 
+    @Override
+    protected NotificationResult performSend(EmailNotification notification) {
+        // Aseguramos el envío al proveedor con el tipo específico
         return provider.send(notification);
     }
 

@@ -1,12 +1,11 @@
 package com.notifications.channels.sms.providers;
 
-import com.notifications.core.Notification;
 import com.notifications.core.NotificationResult;
 import com.notifications.core.SmsNotification;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Implementación simulada de Twilio.
+ * Proveedor de SMS usando Twilio (Simulado).
  */
 @Slf4j
 public class TwilioProvider implements SmsProvider {
@@ -19,11 +18,7 @@ public class TwilioProvider implements SmsProvider {
     }
 
     @Override
-    public NotificationResult send(Notification notification) {
-        if (!(notification instanceof SmsNotification sms)) {
-            return NotificationResult.failed("Expected SmsNotification", null);
-        }
-
+    public NotificationResult send(SmsNotification sms) {
         if (accountSid == null || authToken == null) {
             return NotificationResult.failed("Twilio credentials missing", null);
         }

@@ -1,7 +1,6 @@
 package com.notifications.channels.email;
 
 import com.notifications.channels.email.providers.EmailProvider;
-import com.notifications.core.Notification;
 import com.notifications.core.NotificationResult;
 import com.notifications.core.NotificationStatus;
 import com.notifications.core.EmailNotification;
@@ -40,7 +39,7 @@ class EmailChannelTest {
 
     @Test
     void testSendSuccess() {
-        Notification notification = new EmailNotification(
+        EmailNotification notification = new EmailNotification(
                 "test@example.com", 
                 "Hello", 
                 "World", 
@@ -58,7 +57,7 @@ class EmailChannelTest {
 
     @Test
     void testSendInvalidEmail() {
-        Notification notification = new EmailNotification(
+        EmailNotification notification = new EmailNotification(
                 "invalid-email", 
                 "Sub", 
                 "Body", 
