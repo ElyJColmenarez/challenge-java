@@ -71,23 +71,24 @@ La librería se basa en una arquitectura de **Estrategia Concéntrica**:
 
 ### Cómo Extender la Librería
 
-#### A. Agregar un Nuevo Canal (Ejemplo: WhatsApp)
+La librería está diseñada para ser extendida sin modificar el código core (**Principio Open/Closed**).
 
-1. **Define el modelo:** Crea un nuevo `record WhatsAppNotification` e inclúyelo en los `permits` de la interfaz `Notification`.
-2. **Crea el Canal:** Crea `WhatsAppChannel` implementando `NotificationChannel`.
-3. **Configura el Canal:** Crea `WhatsAppConfig` para sus credenciales.
-4. **Actualiza la Factory:** Añade el método de creación en `NotificationChannelFactory`.
+#### A. Agregar un Nuevo Canal (Ejemplo: WhatsApp)
+1.  **Define el modelo:** Crea un nuevo `record WhatsAppNotification` e inclúyelo en los `permits` de la interfaz `Notification`.
+2.  **Crea el Canal:** Crea `WhatsAppChannel` extendiendo de `AbstractNotificationChannel<WhatsAppNotification>`. Esto te dará validación automática de tipos y flujos comunes.
+3.  **Implementa los Hooks:** Sobrescribe `getNotificationClass()`, `validateSpecific()` y `performSend()`.
+4.  **Define la Configuración:** Crea `WhatsAppConfig` para sus credenciales.
+5.  **Actualiza la Factory:** Añade el método de creación en `NotificationChannelFactory`.
 
 #### B. Agregar un Nuevo Proveedor a un Canal Existente
-
-Si deseas agregar un proveedor de SMS diferente a Twilio (ejemplo: Amazon SNS):
-
-1. Implementa la interfaz `SmsProvider` en una nueva clase `AmazonSnsSmsProvider`.
-2. Actualiza la lógica de `SmsChannel.createProvider()` para que reconozca el nuevo tipo de proveedor desde la configuración.
+Si deseas agregar un proveedor de SMS diferente (ej. Amazon SNS):
+1.  **Implementa el Provider:** Crea una clase `AmazonSnsSmsProvider` que implemente la interfaz `SmsProvider`.
+2.  **Tipado Fuerte:** La interfaz te obligará a recibir `SmsNotification`, eliminando la necesidad de castings manuales.
+3.  **Configura el Canal:** Actualiza la lógica de creación en el constructor o método factory de `SmsChannel` para reconocer el nuevo tipo de proveedor.
 
 ### Manejo de Errores
+No lanzamos excepciones de flujo. Usamos el patrón **Result Type** mediante el record `NotificationResult`. La clase base `AbstractNotificationChannel` captura errores de validación y los retorna de forma estandarizada.
 
-No lanzamos excepciones de flujo. Usamos el patrón **Result Type** mediante el record `NotificationResult`. Esto permite que el cliente maneje fallos de validación o red de forma declarativa.
 
 ---
 
